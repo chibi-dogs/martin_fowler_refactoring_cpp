@@ -48,21 +48,26 @@ TEST(InvoiceParseTest, ParsesFields) {
             "customer": "BigCo",
     "performances": [
       {
-        "playID": "hamlet",
+        "play_id": "hamlet",
         "audience": 55
       },
       {
-        "playID": "as-like",
+        "play_id": "as-like",
         "audience": 35
       },
       {
-        "playID": "othello",
+        "play_id": "othello",
         "audience": 40
       }
     ]
     })"_json;
 
+    const std::vector expected_performances
+    {Performance{.play_id = "hamlet", .audience = 55},
+    Performance{.play_id = "as-like", .audience = 35},
+    Performance{.play_id = "othello", .audience = 40}
+    };
     auto p = j.get<Invoice>();
     EXPECT_EQ(p.customer, "BigCo");
-    //EXPECT_EQ(p.customer, "BigCo");
+    EXPECT_EQ(p.performances, expected_performances);
 }

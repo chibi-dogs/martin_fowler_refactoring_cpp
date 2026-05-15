@@ -7,9 +7,12 @@ namespace json_parser::invoice
 {
     struct Performance
     {
-        std::string play_id;
-        std::size_t audience;
+        std::string play_id{};
+        std::size_t audience{};
     };
+    inline bool operator==(const Performance& a, const Performance& b) {
+        return a.play_id == b.play_id && a.audience == b.audience;
+    }
     NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Performance, play_id, audience);
     struct Invoice
     {
