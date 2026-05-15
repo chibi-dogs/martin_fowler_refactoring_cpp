@@ -1,5 +1,6 @@
 find_package(nlohmann_json REQUIRED)
-add_library(json_parser STATIC)
+add_library(json_parser STATIC
+        invoice.h)
 
 target_include_directories(json_parser
         PUBLIC

@@ -1,5 +1,5 @@
-#ifndef MARTIN_FOWLER_REFACTORING_INVOICE_H
-#define MARTIN_FOWLER_REFACTORING_INVOICE_H
+#ifndef MARTIN_FOWLER_REFACTORING_PLAY_H
+#define MARTIN_FOWLER_REFACTORING_PLAY_H
 #include <string>
 #include <nlohmann/json.hpp>
 
@@ -31,4 +31,4 @@ namespace json_parser::play
     }
 
 }
-#endif //MARTIN_FOWLER_REFACTORING_INVOICE_H
+#endif //MARTIN_FOWLER_REFACTORING_PLAY_H
