@@ -9,7 +9,7 @@
 using namespace json_parser;
 
 auto makeUSDFormatter() {
-    return [](double amount) -> std::string {
+    return [](const double amount) -> std::string {
         std::ostringstream oss;
         oss.imbue(std::locale("en_US.UTF-8"));
         oss << std::showbase << std::put_money(amount * 100.0);
@@ -56,12 +56,11 @@ std::string statement (const invoice::Invoice& invoice, const std::unordered_map
         {
             volume_credits += std::floor(perf.audience / 5);
         }
-        result.append(std::format("{}:{} ({} seats)", name, format_currency(amount/100), perf.audience));
+        result.append(std::format(" {}: {} ({} seats)\n", name, format_currency(amount/100), perf.audience));
         total_amount += amount;
-        result.append(std::format("Amount owed is {}\n", format_currency(total_amount/100)));
-        result.append(std::format("You earned {} credits\n", volume_credits));
     }
-
+    result.append(std::format("Amount owed is {}\n", format_currency(total_amount/100)));
+    result.append(std::format("You earned {} credits\n", volume_credits));
     return result;
 
 }
