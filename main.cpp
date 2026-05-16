@@ -16,7 +16,43 @@ auto makeUSDFormatter() {
         return oss.str();
     };
 }
-std::string statement (const invoice::Invoice& invoice, const std::unordered_map<std::string, play::Play>& play )
+
+std::expected<double, std::string> calculate_amount_for_play_type(const invoice::Performance& perf, const play::Type type)
+{
+    auto amount = 0;
+    switch (type)
+    {
+        case play::Type::Tragedy:
+            {
+                amount += 40000;
+                if (perf.audience > 30)
+                {
+                    amount += 1000 * (perf.audience - 30);
+                }
+                break;
+            }
+        case play::Type::Comedy:
+            {
+                {
+                    amount += 30000;
+                    if (perf.audience > 20)
+                    {
+                        amount += 10000 + 500 * (perf.audience-20);
+                    }
+                    amount += 300 * perf.audience;
+                    break;
+                }
+            }
+        case play::Type::Unknown:
+            {
+                return std::unexpected<std::string>("unknown play type! Currently only comedy and tragedy are supported.");
+            }
+
+    }
+    return amount;
+}
+
+std::expected<std::string, std::string> statement (const invoice::Invoice& invoice, const std::unordered_map<std::string, play::Play>& play )
 {
     auto format_currency = makeUSDFormatter();
     std::string result = std::format("Statement for {}\n", invoice.customer );
@@ -25,39 +61,16 @@ std::string statement (const invoice::Invoice& invoice, const std::unordered_map
     for (const auto& perf: invoice.performances)
     {
         const auto [name, type] = play.at(perf.play_id);
-        auto amount = 0;
-        switch (type)
+        if (const auto expected_amount = calculate_amount_for_play_type(perf, type))
         {
-        case play::Type::Tragedy:
+            volume_credits += std::max(static_cast<int>(perf.audience-30), 0);
+            if (type == play::Type::Comedy )
             {
-                amount += 40000;
-                if (perf.audience > 30)
-                    {
-                        amount += 1000 * (perf.audience - 30);
-                    }
-                break;
+                volume_credits += std::floor(perf.audience / 5);
             }
-        case play::Type::Comedy:
-            {
-                {
-                    amount += 30000;
-                    if (perf.audience > 20)
-                        {
-                            amount += 10000 + 500 * (perf.audience-20);
-                        }
-                    amount += 300 * perf.audience;
-                    break;
-                }
-            }
-        case play::Type::Unknown: return "unknown";
+            result.append(std::format(" {}: {} ({} seats)\n", name, format_currency(expected_amount.value()/100), perf.audience));
+            total_amount += expected_amount.value();
         }
-        volume_credits += std::max(static_cast<int>(perf.audience-30), 0);
-        if (type == play::Type::Comedy )
-        {
-            volume_credits += std::floor(perf.audience / 5);
-        }
-        result.append(std::format(" {}: {} ({} seats)\n", name, format_currency(amount/100), perf.audience));
-        total_amount += amount;
     }
     result.append(std::format("Amount owed is {}\n", format_currency(total_amount/100)));
     result.append(std::format("You earned {} credits\n", volume_credits));
@@ -80,8 +93,11 @@ int main()
     }
     for (const auto& invoice : invoices)
     {
-        const auto result = statement(invoice, plays);
-        std::cout << result << std::endl;
+        if (const auto result = statement(invoice, plays))
+        {
+            std::cout << *result << std::endl;
+        }
+
     }
 
 }
